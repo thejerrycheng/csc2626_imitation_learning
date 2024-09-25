@@ -113,7 +113,7 @@ if __name__ == "__main__":
     parser.add_argument("--learner_interval", type=int, help="Number of timesteps for which the learner policy runs", default=20)
     parser.add_argument("--expert_interval", type=int, help="Number of timesteps to switch between learner and expert", default=100)
     parser.add_argument("--visualize_dir", help="Directory to save visualization frames", default='./visualize_frames')
-    parser.add_argument("--cte_threshold", type=float, help="Cross-track error threshold to switch to expert policy", default=3.5)
+    parser.add_argument("--cte_threshold", type=float, help="Cross-track error threshold to switch to expert policy", default=10)
     args = parser.parse_args()
 
     visualize_dagger_policy(args)
