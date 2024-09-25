@@ -100,10 +100,12 @@ def get_class_distribution(iterator, args):
     return (class_dist / sum(class_dist))
 
 def main(args):
-    data_transform = transforms.Compose([ transforms.ToPILImage(),
-                                          transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1),
-                                          transforms.RandomRotation(degrees=80),
-                                          transforms.ToTensor()])
+    data_transform = transforms.Compose([ 
+        transforms.ToPILImage(),
+        transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1),
+        transforms.RandomRotation(degrees=80),
+        transforms.ToTensor()
+    ])
     
     training_dataset = DrivingDataset(root_dir=args.train_dir,
                                       categorical=True,
@@ -123,19 +125,23 @@ def main(args):
     opt = torch.optim.Adam(driving_policy.parameters(), lr=args.lr)
     args.start_time = time.time()
     
-    print(driving_policy)
-    print(opt)
-    print(args)
-
-    # Retrieve class distribution
     args.class_dist = get_class_distribution(training_iterator, args)
-    
+    print("Class distribution result is: ", args.class_dist)
+
     if args.weighted_loss:
-        # Compute weights as the inverse of class frequencies
-        class_weights = 1.0 / (args.class_dist + 1e-6)  # Adding epsilon to avoid division by zero
+        # Exclude class 19 from the weight calculation
+        class_weights = np.where(np.arange(len(args.class_dist)) != 19, 1.0 / (args.class_dist + 1e-6), 0.0)
         class_weights /= class_weights.sum()  # Normalize to sum to 1
         class_weights = torch.tensor(class_weights, dtype=torch.float32)
-        print("Class weights: ", class_weights)
+        
+        # Detailed printout
+        print("\nDetailed Class Weights and Steering Ranges (excluding Class 19):")
+        for i, weight in enumerate(class_weights):
+            if i == 19:
+                continue
+            steering_min = (i / (args.n_steering_classes - 1.0)) * 2.0 - 1.0
+            steering_max = ((i + 1) / (args.n_steering_classes - 1.0)) * 2.0 - 1.0
+            print(f"Class {i}: Steering Range [{steering_min:.3f}, {steering_max:.3f}] => Weight: {weight.item() * 100:.2f}%")
     else:
         class_weights = None
 
@@ -164,13 +170,13 @@ if __name__ == "__main__":
     parser.add_argument("--n_epochs", type=int, help="number of epochs", default=50)
     parser.add_argument("--batch_size", type=int, help="batch_size", default=256)
     parser.add_argument("--n_steering_classes", type=int, help="number of steering classes", default=20)
-    parser.add_argument("--train_dir", help="directory of training data", default='./dataset/train')
-    parser.add_argument("--validation_dir", help="directory of validation data", default='./dataset/val')
+    parser.add_argument("--train_dir", help="directory of training data", default='./expert_dataset/train')
+    parser.add_argument("--validation_dir", help="directory of validation data", default='./expert_dataset/val')
     parser.add_argument("--weights_out_file", help="where to save the weights of the network e.g. ./weights/learner_0.weights",
                         required=True)
     parser.add_argument("--weighted_loss", type=str2bool,
                         help="should you weight the labeled examples differently based on their frequency of occurrence",
-                        default=False)
+                        default=True)
     
     args = parser.parse_args()
 

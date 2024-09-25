@@ -98,12 +98,13 @@ def get_class_distribution(iterator, args):
         class_dist += np.bincount(y, minlength=args.n_steering_classes)
         
     return (class_dist / sum(class_dist))
-
 def main(args):
-    data_transform = transforms.Compose([ transforms.ToPILImage(),
-                                          transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1),
-                                          transforms.RandomRotation(degrees=80),
-                                          transforms.ToTensor()])
+    # Remove `transforms.ToPILImage()` from the transformation pipeline
+    data_transform = transforms.Compose([
+        transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1),
+        transforms.RandomRotation(degrees=80),
+        transforms.ToTensor()
+    ])
     
     training_dataset = DrivingDataset(root_dir=args.train_dir,
                                       categorical=True,
@@ -131,8 +132,7 @@ def main(args):
     args.class_dist = get_class_distribution(training_iterator, args)
 
     best_val_accuracy = 0 
-    for epoch in range(args.n_epochs):
-    # for epoch in range(5):
+    for epoch in range(25):
         print('EPOCH', epoch)
 
         # Train the driving policy
@@ -156,9 +156,9 @@ if __name__ == "__main__":
     parser.add_argument("--n_epochs", type=int, help="number of epochs", default=50)
     parser.add_argument("--batch_size", type=int, help="batch_size", default=256)
     parser.add_argument("--n_steering_classes", type=int, help="number of steering classes", default=20)
-    parser.add_argument("--train_dir", help="directory of training data", default='./dataset/train')
-    parser.add_argument("--validation_dir", help="directory of validation data", default='./dataset/val')
-    parser.add_argument("--weights_out_file", help="where to save the weights of the network e.g. ./weights/learner_0.weights",
+    parser.add_argument("--train_dir", help="directory of training data", default='expert_dataset/train')
+    parser.add_argument("--validation_dir", help="directory of validation data", default='expert_dataset/val')
+    parser.add_argument("--weights_out_file", help="where to save the weights of the network e.g. ./weights/learner_0_expert.weights",
                         required=True)
     parser.add_argument("--weighted_loss", type=str2bool,
                         help="should you weight the labeled examples differently based on their frequency of occurence",

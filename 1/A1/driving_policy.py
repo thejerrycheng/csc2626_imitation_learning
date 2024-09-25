@@ -65,6 +65,8 @@ class DiscreteDrivingPolicy(nn.Module):
         steering_class = steering_class.detach().cpu().numpy()
         
         steering_cmd = (steering_class / (self.n_classes - 1.0)) * 2.0 - 1.0
+        # steering_cmd = (steering_class - ((self.n_classes - 1) / 2)) / ((self.n_classes - 1) / 2)
+        print("Steering class: ", steering_class, "Steering command: ", steering_cmd)
         
         return steering_cmd
     

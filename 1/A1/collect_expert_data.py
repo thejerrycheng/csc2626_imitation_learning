@@ -8,10 +8,10 @@ from full_state_car_racing_env import FullStateCarRacingEnv  # Import the enviro
 FPS = 50  # Set to the same FPS as used in the FullStateCarRacingEnv environment
 
 # Create the necessary directories if they don't exist
-os.makedirs('./expert_dataset/train', exist_ok=True)
-os.makedirs('./expert_dataset/val', exist_ok=True)
+os.makedirs('./expert_dataset_2/train', exist_ok=True)
+os.makedirs('./expert_dataset_2/val', exist_ok=True)
 
-def collect_expert_demos(num_iterations, num_timesteps, data_dir='./expert_dataset/train'):
+def collect_expert_demos(num_iterations, num_timesteps, data_dir='./expert_dataset_2/train'):
     # Initialize the car racing environment with the expert feedback controller
     env = FullStateCarRacingEnv()  # Use the expert environment
 
@@ -69,9 +69,9 @@ def collect_expert_demos(num_iterations, num_timesteps, data_dir='./expert_datas
 if __name__ == "__main__":
     # Set up argument parser
     parser = argparse.ArgumentParser(description="Collect expert demonstration data using a feedback controller.")
-    parser.add_argument("--num_iterations", type=int, default=10, help="Number of iterations to collect expert data")
+    parser.add_argument("--num_iterations", type=int, default=20, help="Number of iterations to collect expert data")
     parser.add_argument("--num_timesteps", type=int, default=1000, help="Number of timesteps per iteration")
-    parser.add_argument("--data_dir", type=str, default='./expert_dataset/train', help="Directory to save collected data")
+    parser.add_argument("--data_dir", type=str, default='./expert_dataset_2/train', help="Directory to save collected data")
 
     args = parser.parse_args()
 
